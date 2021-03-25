@@ -1,4 +1,3 @@
-#[macro_use]
 extern crate juniper;
 #[macro_use]
 extern crate diesel;
@@ -6,7 +5,7 @@ extern crate diesel;
 use std::io;
 use std::sync::Arc;
 
-use actix_web::{web, App, Error, HttpResponse, HttpServer, Responder};
+use actix_web::{web, App, Error, HttpResponse, HttpServer};
 use futures::future::Future;
 use juniper::http::graphiql::graphiql_source;
 use juniper::http::GraphQLRequest;
@@ -30,7 +29,7 @@ fn main() -> io::Result<()> {
 
 fn graphql(
     st: web::Data<Arc<Schema>>,
-    data: web::Json<GraphQLRequest>
+    data: web::Json<GraphQLRequest>,
 ) -> impl Future<Item = HttpResponse, Error = Error> {
     web::block(move || {
         let res = data.execute(&st, &());

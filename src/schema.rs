@@ -1,57 +1,57 @@
 table! {
     categories (id) {
-        id -> Int8,
+        id -> Integer,
         category_name -> Nullable<Varchar>,
     }
 }
 
 table! {
     companies (id) {
-        id -> Int8,
-        name -> Nullable<Varchar>,
-        category -> Nullable<Varchar>,
+        id -> Integer,
+        name -> Varchar,
+        category -> Varchar,
         phone -> Nullable<Varchar>,
         mail -> Nullable<Varchar>,
         web -> Nullable<Varchar>,
         description -> Nullable<Text>,
-        whatsapp -> Nullable<Int8>,
+        whatsapp -> Nullable<Varchar>,
         approved -> Bool,
     }
 }
 
 table! {
     login_tokens (id) {
-        id -> Int8,
-        account_id -> Int8,
+        id -> Integer,
+        account_id -> Integer,
         token -> Varchar,
-        date -> Date,
+        date -> Timestamp,
     }
 }
 
 table! {
     subscribed_categories (id) {
-        id -> Int8,
-        account_id -> Nullable<Int8>,
-        category_id -> Nullable<Int8>,
+        id -> Integer,
+        account_id -> Nullable<Integer>,
+        category_id -> Nullable<Integer>,
     }
 }
 
 table! {
     subscribed_companies (id) {
-        id -> Int8,
-        account_id -> Nullable<Int8>,
-        company_id -> Nullable<Int8>,
-        date -> Nullable<Date>,
+        id -> Integer,
+        account_id -> Nullable<Integer>,
+        company_id -> Nullable<Integer>,
+        date -> Timestamp,
     }
 }
 
 table! {
     subscriptions (id) {
-        id -> Int8,
-        user_id -> Nullable<Int8>,
+        id -> Integer,
+        user_id -> Nullable<Integer>,
         #[sql_name = "type"]
         type_ -> Nullable<Varchar>,
-        date -> Nullable<Date>,
+        date -> Timestamp,
         adress -> Nullable<Varchar>,
         auth -> Nullable<Varchar>,
         p256dh -> Nullable<Varchar>,
@@ -60,16 +60,16 @@ table! {
 
 table! {
     users (id) {
-        id -> Int8,
+        id -> Integer,
         email -> Nullable<Varchar>,
         password -> Nullable<Varchar>,
         name -> Nullable<Varchar>,
         account_type -> Nullable<Varchar>,
-        unique_identifier -> Nullable<Varchar>,
-        register_date -> Nullable<Date>,
-        varified -> Nullable<Bool>,
-        last_action_date -> Nullable<Date>,
-        company -> Nullable<Int8>,
+        unique_identifier -> Varchar,
+        register_date -> Timestamptz,
+        verified -> Bool,
+        last_action_date -> Timestamptz,
+        company -> Nullable<Integer>,
     }
 }
 

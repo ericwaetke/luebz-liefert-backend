@@ -1,6 +1,6 @@
 extern crate dotenv;
 
-use std::env;
+// use std::env;
 
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
@@ -8,122 +8,114 @@ use dotenv::dotenv;
 
 use juniper::{EmptyMutation, RootNode};
 
-// use crate::schema::members;
+use chrono::prelude::*;
 
-// #[derive(Queryable)]
-// struct Member {
-// 	pub id: i32,
-// 	pub name: String,
-// 	pub knockouts: i32,
-// 	pub team_id: i32
+// pub enum Category {
+//     Einzelhandel,
+//     Gastronomie,
+//     Dienstleistung,
+//     Sonstiges,
 // }
 
-// #[juniper::object(description = "A member of a team")]
-// impl Member {
-// 	pub fn id(&self) -> i32 {
-// 		self.id  
-// 	}
-
-// 	pub fn name(&self) -> &str {
-// 		self.name.as_str()
-// 	}
-
-// 	pub fn knockouts(&self) -> i32{
-// 		self.knockouts
-// 	}
-
-// 	pub fn team_id(&self) -> i32 {
-// 		self.team_id
-// 	}
+// fn printCategory(category: Category) -> String {
+//     match category {
+//         Einzelhandel => String::from("Einzelhandel"),
+//         Gastronomie => String::from("Gastronomie"),
+//         Dienstleistung => String::from("Dienstleistung"),
+//         Sonstiges => String::from("Sonstiges"),
+//     }
 // }
 
-
-// User Table
-
-// use crate::schema::users;
-
-// #[derive(Queryable)]
-// struct User {
-// 	pub id: i32,
-// 	pub name: String,
-// 	pub knockouts: i32,
-// 	pub team_id: i32
-// }
-
-// #[juniper::object(description = "A single User")]
-// impl User {
-// 	pub fn id(&self) -> i32 {
-// 		self.id  
-// 	}
-
-// 	pub fn name(&self) -> &str {
-// 		self.name.as_str()
-// 	}
-
-// 	pub fn knockouts(&self) -> i32{
-// 		self.knockouts
-// 	}
-
-// 	pub fn team_id(&self) -> i32 {
-// 		self.team_id
-// 	}
-// }
-
-// use crate::schema::teams;
-
-// #[derive(Queryable)]
-// pub struct Team {
-// 	pub id: i32,
-// 	pub name: String,
-// }
-
-// #[juniper::object(description = "A team of members")]
-// impl Team {
-// 	pub fn id(&self) -> i32 {
-// 		self.id
-// 	}
-
-// 	pub fn name(&self) -> &str {
-// 		self.name.as_str()
-// 	}
-
-// 	pub fn members(&self) -> Vec<Member> {
-// 		use crate::schema::members::dsl::*;
-// 		let connection = establish_connection();
-// 		members
-// 			.filter(team_id.eq(self.id))
-// 			.limit(100)
-// 			.load::<Member>(&connection)
-// 			.expect("Error loading members")
-// 	}
-// }
-
-pub enum Category {
-	Einzelhandel,
-	Gastronomie,
-	Dienstleistung,
-	Sonstiges
+#[derive(Queryable)]
+pub struct User {
+	pub id: i32,
+	pub email: Option<String>,
+	pub password: Option<String>,
+	pub name: Option<String>,
+	pub account_type: Option<String>,
+	pub unique_identifier: String,
+	pub register_date: DateTime<Local>,
+	pub verified: bool,
+	pub last_action_date: DateTime<Local>,
+	pub company: Option<Company>,
 }
 
-fn printCategory(category: Category) -> String {
-	match category{
-		Einzelhandel => String::from("Einzelhandel"),
-		Gastronomie => String::from("Gastronomie"),
-		Dienstleistung => String::from("Dienstleistung"),
-		Sonstiges => String::from("Sonstiges")
+#[juniper::object(description = "Queries a single user")]
+impl User {
+	pub fn id(&self) -> i32 {
+		self.id
 	}
+
+	pub fn email(&self) -> &str {
+		match &self.email {
+			Some(val) => val,
+			None => "",
+		}
+	}
+
+	pub fn email(&self) -> &str {
+		match &self.email {
+			Some(val) => val,
+			None => "",
+		}
+	}
+
+	pub fn password(&self) -> &str {
+		match &self.password {
+			Some(val) => val,
+			None => "",
+		}
+	}
+
+	pub fn name(&self) -> &str {
+		match &self.name {
+			Some(val) => val,
+			None => "",
+		}
+	}
+
+	pub fn account_type(&self) -> &str {
+		match &self.account_type {
+			Some(val) => val,
+			None => "",
+		}
+	}
+
+	pub fn unique_identifier(&self) -> &str {
+		match &self.unique_identifier {
+			Some(val) => val,
+			None => "",
+		}
+	}
+
+	pub fn register_date(&self) -> String {
+		self.register_date.to_string()
+	}
+
+	pub fn verified(&self) -> bool {
+		self.verified
+	}
+
+	pub fn last_action_date(&self) -> String {
+		self.last_action_date.to_string()
+	}
+
+	// pub fn company(&self) -> Company {
+		
+	// }
 }
 
 #[derive(Queryable)]
 pub struct Company {
 	pub id: i32,
 	pub name: String,
-	pub category: Category,
-	pub tel: Nullable<String>,
-	pub mail: Nullable<String>,
-	pub web: Nullable<String>,
-	pub url: Nullable<String>,
-	pub approved: bool
+	pub category: String, // I have the enum but don't know how that works with the database
+	pub phone: Option<String>,
+	pub mail: Option<String>,
+	pub web: Option<String>,
+	pub description: Option<String>,
+	pub whatsapp: Option<String>,
+	pub approved: bool,
 }
 
 #[juniper::object(description = "A Single Company")]
@@ -137,23 +129,28 @@ impl Company {
 	}
 
 	pub fn category(&self) -> &str {
-		printCategory(self.category).as_str()
+		self.category.as_str()
 	}
 
 	pub fn tel(&self) -> &str {
-        &self.tel.as_str()
+		match &self.phone {
+			Some(val) => val,
+			None => "",
+		}
 	}
 
 	pub fn mail(&self) -> &str {
-		&self.mail.as_str()
+		match &self.mail {
+			Some(val) => val,
+			None => "",
+		}
 	}
 
 	pub fn web(&self) -> &str {
-		&self.web.as_str()
-	}
-
-	pub fn url(&self) -> &str {
-		&self.url.as_str()
+		match &self.web {
+			Some(val) => val,
+			None => "",
+		}
 	}
 
 	pub fn approved(&self) -> &bool {
@@ -170,22 +167,12 @@ impl Company {
 	// 	// 	.expect("Error loading members")
 	// 	vec![]
 	// }
-	pub fn subscribers() -> &bool {
-		// use crate::schema::members::dsl::*;
-		// let connection = establish_connection();
-		// members
-		// 	.filter(team_id.eq(self.id))
-		// 	.limit(100)
-		// 	.load::<Member>(&connection)
-		// 	.expect("Error loading members")
-		&true
-	}
 
-	pub fn subscriber_count() -> i32 {
+	pub fn subscriber_count(&self) -> i32 {
+		// Company::subscriber_count()
 		12
 	}
 }
-
 
 pub struct QueryRoot;
 
@@ -206,8 +193,16 @@ impl QueryRoot {
 			.load::<Company>(&connection)
 			.expect("Error could not load companies")
 	}
-}
 
+	fn users() -> Vec<User> {
+		use crate::schema::users::dsl::*;
+		let connection = establish_connection();
+		users
+			.limit(100)
+			.load::<User>(&connection)
+			.expect("Error could not load users")
+	}
+}
 
 pub struct MutationRoot;
 
@@ -230,9 +225,8 @@ pub struct MutationRoot;
 // 	pub team_id: i32,
 // }
 
-
 pub type Schema = RootNode<'static, QueryRoot, EmptyMutation<()>>;
 
 pub fn create_schema() -> Schema {
-  Schema::new(QueryRoot {}, EmptyMutation::new())
+	Schema::new(QueryRoot {}, EmptyMutation::new())
 }
