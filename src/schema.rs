@@ -39,7 +39,7 @@ table! {
 table! {
     subscribed_companies (id) {
         id -> Integer,
-        account_id -> Nullable<Integer>,
+        user_id -> Nullable<Integer>,
         company_id -> Nullable<Integer>,
         date -> Timestamp,
     }
@@ -75,6 +75,7 @@ table! {
 
 joinable!(users -> companies (company_id));
 
+joinable!(subscribed_companies -> users (user_id));
 joinable!(subscribed_categories -> categories (category_id));
 
 allow_tables_to_appear_in_same_query!(

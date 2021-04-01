@@ -1,6 +1,7 @@
 extern crate dotenv;
 
 // use std::env;
+use std::convert::TryFrom;
 
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
@@ -8,25 +9,8 @@ use dotenv::dotenv;
 
 use juniper::{EmptyMutation, RootNode};
 
-use chrono::prelude::*;
 
-// pub enum Category {
-//     Einzelhandel,
-//     Gastronomie,
-//     Dienstleistung,
-//     Sonstiges,
-// }
-
-// fn printCategory(category: Category) -> String {
-//     match category {
-//         Einzelhandel => String::from("Einzelhandel"),
-//         Gastronomie => String::from("Gastronomie"),
-//         Dienstleistung => String::from("Dienstleistung"),
-//         Sonstiges => String::from("Sonstiges"),
-//     }
-// }
-
-#[derive(Queryable)]
+#[derive(Queryable, Clone)]
 // #[belongs_to(Company)]
 pub struct User {
 	pub id: i32,
@@ -38,7 +22,7 @@ pub struct User {
 	pub register_date: chrono::NaiveDateTime,
 	pub verified: bool,
 	pub last_action_date: chrono::NaiveDateTime,
-	pub company_id: Option<Company>,
+	pub company: Option<i32>,
 }
 
 #[juniper::object(description = "Queries a single user")]
@@ -98,12 +82,44 @@ impl User {
 		self.last_action_date.to_string()
 	}
 
-	pub fn company_id(&self) -> Option<Company> {
-		self.company_id
+	pub fn company(&self) -> Option<Company> {
+		let company_id = self.company;
+
+		match company_id {
+			Some(company_id) => {
+				use crate::schema::companies::dsl::*;
+				let connection = establish_connection();
+				companies
+					.filter(id.eq(company_id))
+					.limit(1)
+					.first::<Company>(&connection)
+					.optional()
+					.expect("Error could not load companies")
+			}
+			None => None
+		}
 	}
 }
 
-#[derive(Queryable, Eq, Hash, PartialEq)]
+
+
+// pub enum Category {
+//     Einzelhandel,
+//     Gastronomie,
+//     Dienstleistung,
+//     Sonstiges,
+// }
+
+// fn printCategory(category: Category) -> String {
+//     match category {
+//         Einzelhandel => String::from("Einzelhandel"),
+//         Gastronomie => String::from("Gastronomie"),
+//         Dienstleistung => String::from("Dienstleistung"),
+//         Sonstiges => String::from("Sonstiges"),
+//     }
+// }
+
+#[derive(Queryable, Clone)]
 pub struct Company {
 	pub id: i32,
 	pub name: String,
@@ -155,20 +171,40 @@ impl Company {
 		&self.approved
 	}
 
-	// pub fn subscribers() -> Vec<User> {
-	// 	// use crate::schema::members::dsl::*;
-	// 	// let connection = establish_connection();
-	// 	// members
-	// 	// 	.filter(team_id.eq(self.id))
-	// 	// 	.limit(100)
-	// 	// 	.load::<Member>(&connection)
-	// 	// 	.expect("Error loading members")
-	// 	vec![]
+	// pub fn subscribers(&self) -> Vec<User> {
+	// 	use crate::schema::users::dsl::*;
+	// 	let connection = establish_connection();
+	// 	users
+	// 		.filter(company_id.eq(&self.id))
+	// 		.inner_join(crate::schema::subscribed_companies::table)
+	// 		.limit(100)
+	// 		.load::<User>(&connection)
+	// 		.expect("Error could not load users")
 	// }
 
-	pub fn subscriber_count(&self) -> i32 {
-		// Company::subscriber_count()
-		12
+	pub fn subscriber_count(&self) -> Option<i32> {
+		use crate::schema::subscribed_companies::dsl::*;
+		let connection = establish_connection();
+		let subscribers: i64 = subscribed_companies
+			.filter(company_id.eq(&self.id))
+			.count()
+			.get_result(&connection)
+			.expect("Error could not load companies");
+
+		match i32::try_from(subscribers) {
+			Ok(n) => Some(n),
+			Err(e) => None
+		}
+	}
+
+	pub fn admin(&self) -> Option<User> {
+		use crate::schema::users::dsl::*;
+		let connection = establish_connection();
+		users
+			.filter(company_id.eq(&self.id))
+			.first::<User>(&connection)
+			.optional()
+			.expect("Error could not load companies")
 	}
 }
 
@@ -192,17 +228,48 @@ impl QueryRoot {
 			.expect("Error could not load companies")
 	}
 
-	fn users() -> Vec<User> {
-		// let join = crate::schema::users::table.inner_join(crate::schema::companies::table);
-		let join = crate::schema::users::dsl::*;
-		// use crate::schema::users::dsl::*;
+	fn company(company_id: i32) -> Company {
+		use crate::schema::companies::dsl::*;
 		let connection = establish_connection();
-		join
+		companies
+			.filter(id.eq(company_id))
+			.first::<Company>(&connection)
+			.expect("Error could not load users")
+	}
+
+	fn users() -> Vec<User> {
+		use crate::schema::users::dsl::*;
+		let connection = establish_connection();
+		users
 			.limit(100)
 			.load::<User>(&connection)
 			.expect("Error could not load users")
 	}
+
+	fn user(user_id: i32) -> User {
+		use crate::schema::users::dsl::*;
+		let connection = establish_connection();
+		users
+			.filter(id.eq(user_id))
+			.first::<User>(&connection)
+			.expect("Error could not load users")
+	}
 }
+
+// fn get_latest_news() -> Vec<News> {
+//     use schema::cover;
+//     use schema::news;
+//     let connection = &*get_pooled_connection();
+//     news::table
+//         .inner_join(cover::table)
+//         .limit(5)
+//         .order(news::date.desc())
+//         .load::<(NewsRow, Cover)>(connection) // To this point we get the result as a tuple. 
+//         .expect("Error loading news") // Another panic waiting to happen!
+//         .iter()
+//         .map(|result| News::from(&result.0, &result.1))
+//         .collect()
+// }
 
 pub struct MutationRoot;
 
