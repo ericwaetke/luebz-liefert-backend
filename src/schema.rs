@@ -69,9 +69,11 @@ table! {
         register_date -> Timestamptz,
         verified -> Bool,
         last_action_date -> Timestamptz,
-        company -> Nullable<Integer>,
+        company_id -> Nullable<Integer>,
     }
 }
+
+joinable!(users -> companies (company_id));
 
 joinable!(subscribed_categories -> categories (category_id));
 

@@ -27,6 +27,7 @@ use chrono::prelude::*;
 // }
 
 #[derive(Queryable)]
+// #[belongs_to(Company)]
 pub struct User {
 	pub id: i32,
 	pub email: Option<String>,
@@ -34,10 +35,10 @@ pub struct User {
 	pub name: Option<String>,
 	pub account_type: Option<String>,
 	pub unique_identifier: String,
-	pub register_date: DateTime<Local>,
+	pub register_date: chrono::NaiveDateTime,
 	pub verified: bool,
-	pub last_action_date: DateTime<Local>,
-	pub company: Option<Company>,
+	pub last_action_date: chrono::NaiveDateTime,
+	pub company_id: Option<Company>,
 }
 
 #[juniper::object(description = "Queries a single user")]
@@ -81,11 +82,8 @@ impl User {
 		}
 	}
 
-	pub fn unique_identifier(&self) -> &str {
-		match &self.unique_identifier {
-			Some(val) => val,
-			None => "",
-		}
+	pub fn unique_identifier(&self) -> String {
+		self.unique_identifier.to_string()
 	}
 
 	pub fn register_date(&self) -> String {
@@ -100,12 +98,12 @@ impl User {
 		self.last_action_date.to_string()
 	}
 
-	// pub fn company(&self) -> Company {
-		
-	// }
+	pub fn company_id(&self) -> Option<Company> {
+		self.company_id
+	}
 }
 
-#[derive(Queryable)]
+#[derive(Queryable, Eq, Hash, PartialEq)]
 pub struct Company {
 	pub id: i32,
 	pub name: String,
@@ -195,9 +193,11 @@ impl QueryRoot {
 	}
 
 	fn users() -> Vec<User> {
-		use crate::schema::users::dsl::*;
+		// let join = crate::schema::users::table.inner_join(crate::schema::companies::table);
+		let join = crate::schema::users::dsl::*;
+		// use crate::schema::users::dsl::*;
 		let connection = establish_connection();
-		users
+		join
 			.limit(100)
 			.load::<User>(&connection)
 			.expect("Error could not load users")
