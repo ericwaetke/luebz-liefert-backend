@@ -13,21 +13,25 @@ Needed Queries:
 - [x] All Companies
 - [x] One Company
 
-- [ ] Companies:
-	- [ ] Subcribed Users
+- [x] Companies:
+	- [x] Subcribed Users
 	- [x] Subscriber Count
 	- [x] Admin
-	- [ ] News
+	- [x] News
 
 - [x] All Users
 - [x] One User
 
-- [ ] Users:
-	- [ ] Subscribed Comanies
-	- [ ] Subscribed Categories
+- [x] Users:
+	- [x] Subscribed Comanies
+	- [x] Subscribed Categories
 	
-- [ ] All Categories
+- [x] All Categories
+- [x] One Category
 
-- [ ] All News
-- [ ] One News
+- [x] Categories:
+	- [x] Subscribed Users
+
+- [x] All News
+- [x] One News
 	- [ ] Filtered By:	id and company

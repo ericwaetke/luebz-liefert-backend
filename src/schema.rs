@@ -1,7 +1,7 @@
 table! {
     categories (id) {
         id -> Integer,
-        category_name -> Nullable<Varchar>,
+        name -> Varchar,
     }
 }
 
@@ -31,16 +31,17 @@ table! {
 table! {
     subscribed_categories (id) {
         id -> Integer,
-        account_id -> Nullable<Integer>,
-        category_id -> Nullable<Integer>,
+        user_id -> Integer,
+        category_id -> Integer,
+        date -> Timestamp,
     }
 }
 
 table! {
     subscribed_companies (id) {
         id -> Integer,
-        user_id -> Nullable<Integer>,
-        company_id -> Nullable<Integer>,
+        user_id -> Integer,
+        company_id -> Integer,
         date -> Timestamp,
     }
 }
@@ -73,10 +74,23 @@ table! {
     }
 }
 
+table! {
+    news (id) {
+        id -> Int4,
+        company_id -> Int4,
+        date -> Timestamptz,
+        titel -> Varchar,
+        content -> Text,
+    }
+}
+
 joinable!(users -> companies (company_id));
 
 joinable!(subscribed_companies -> users (user_id));
+joinable!(subscribed_companies -> companies (company_id));
+
 joinable!(subscribed_categories -> categories (category_id));
+joinable!(subscribed_categories -> users (user_id));
 
 allow_tables_to_appear_in_same_query!(
     categories,
