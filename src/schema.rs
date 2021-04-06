@@ -79,7 +79,7 @@ table! {
         id -> Int4,
         company_id -> Int4,
         date -> Timestamptz,
-        titel -> Varchar,
+        title -> Varchar,
         content -> Text,
     }
 }
