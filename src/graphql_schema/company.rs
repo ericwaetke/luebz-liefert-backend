@@ -2,9 +2,11 @@ use diesel::prelude::*;
 
 use std::convert::TryFrom;
 
+use crate::schema::companies;
+
 use super::establish_connection;
 use super::user::User;
-use super::news::News;
+use super::post::Post;
 
 #[derive(Queryable, Clone)]
 pub struct Company {
@@ -33,38 +35,33 @@ impl Company {
 		self.category.as_str()
 	}
 
-	pub fn tel(&self) -> &str {
-		match &self.phone {
-			Some(val) => val,
-			None => "",
-		}
+	pub fn phone(&self) -> &Option<String> {
+		&self.phone
 	}
 
-	pub fn mail(&self) -> &str {
-		match &self.mail {
-			Some(val) => val,
-			None => "",
-		}
+	pub fn mail(&self) -> &Option<String> {
+		&self.mail
 	}
 
-	pub fn web(&self) -> &str {
-		match &self.web {
-			Some(val) => val,
-			None => "",
-		}
+	pub fn web(&self) -> &Option<String> {
+		&self.web
+	}
+
+	pub fn description(&self) -> &Option<String> {
+		&self.description
 	}
 
 	pub fn approved(&self) -> &bool {
 		&self.approved
 	}
 
-	pub fn news(&self) -> Vec<News> {
-		use crate::schema::news::dsl::*;
+	pub fn posts(&self) -> Vec<Post> {
+		use crate::schema::posts::dsl::*;
 		let connection = establish_connection();
-		news
+		posts
 			.filter(company_id.eq(self.id))
-			.load::<News>(&connection)
-			.expect("Could not load News")
+			.load::<Post>(&connection)
+			.expect("Could not load Posts")
 	}
 
 	pub fn subscribers(&self) -> Vec<User> {
@@ -104,3 +101,46 @@ impl Company {
 			.expect("Error could not load companies")
 	}
 }
+
+#[derive(juniper::GraphQLInputObject, Insertable)]
+#[table_name = "companies"]
+pub struct NewCompany {
+	pub name: String,
+	pub category: String,
+	pub phone: Option<String>,
+	pub mail: Option<String>,
+	pub web: Option<String>,
+	pub description: Option<String>,
+	pub whatsapp: Option<String>,
+}
+
+// #[juniper::object(description = "A New Company")]
+// impl NewCompany {
+// 	pub fn name(&self) -> &str {
+// 		&self.name
+// 	}
+
+// 	pub fn category(&self) -> &str {
+// 		&self.category
+// 	}
+
+// 	pub fn phone(&self) -> Option<String> {
+// 		self.phone
+// 	}
+	
+// 	pub fn mail(&self) -> Option<String> {
+// 		self.mail
+// 	}
+	
+// 	pub fn web(&self) -> Option<String> {
+// 		self.web
+// 	}
+
+// 	pub fn description(&self) -> Option<String> {
+// 		self.description
+// 	}
+
+// 	pub fn whatsapp(&self) -> Option<String> {
+// 		self.whatsapp
+// 	}
+// }

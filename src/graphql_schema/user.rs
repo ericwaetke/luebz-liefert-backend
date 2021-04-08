@@ -1,5 +1,7 @@
 use diesel::prelude::*;
 
+use crate::schema::users;
+
 use super::establish_connection;
 use super::company::Company;
 use super::category::Category;
@@ -119,7 +121,8 @@ impl User {
 	}
 }
 
-#[derive(Queryable)]
+#[derive(juniper::GraphQLInputObject, Insertable)]
+#[table_name = "users"]
 pub struct NewUser {
 	pub id: i32,
 	pub email: Option<String>,

@@ -12,13 +12,13 @@ use juniper::{RootNode};
 
 mod company;
 mod user;
-mod news;
+mod post;
 mod category;
 mod subscription;
 
 use company::*;
 use user::*;
-use news::*;
+use post::*;
 use category::*;
 use subscription::*;
 
@@ -84,20 +84,20 @@ impl QueryRoot {
 			.expect("Error could not load")
 	}
 
-	fn news(news_id: i32) -> News {
-		use crate::schema::news::dsl::*;
+	fn posts(posts_id: i32) -> Post {
+		use crate::schema::posts::dsl::*;
 		let connection = establish_connection();
-		news
-			.filter(id.eq(news_id))
-			.first::<News>(&connection)
+		posts
+			.filter(id.eq(posts_id))
+			.first::<Post>(&connection)
 			.expect("Error could not load")
 	}
 
-	fn all_news() -> Vec<News> {
-		use crate::schema::news::dsl::*;
+	fn all_posts() -> Vec<Post> {
+		use crate::schema::posts::dsl::*;
 		let connection = establish_connection();
-		news
-			.load::<News>(&connection)
+		posts
+			.load::<Post>(&connection)
 			.expect("Error could not load")
 	}
 }
@@ -106,9 +106,9 @@ pub struct MutationRoot;
 
 #[juniper::object]
 impl MutationRoot {
-	fn create_post(data: NewsPost) -> News {
+	fn create_post(data: NewPost) -> Post {
 		let connection = establish_connection();
-		diesel::insert_into(crate::schema::news::table)
+		diesel::insert_into(crate::schema::posts::table)
 			.values(&data)
 			.get_result(&connection)
 			.expect("Error saving new post")
@@ -145,7 +145,7 @@ impl MutationRoot {
 			.execute(&connection)
 			.expect("Error changing Company Subscription");
 
-			SubscriptionDeleteSuccess {
+		SubscriptionDeleteSuccess {
 			success: res != 0
 		}
 	}
@@ -161,6 +161,15 @@ impl MutationRoot {
 			success: res != 0
 		}
 	}
+
+	fn add_company(data: NewCompany) -> Company {
+		let connection = establish_connection();
+		diesel::insert_into(crate::schema::companies::table)
+			.values(&data)
+			.get_result::<Company>(&connection)
+			.expect("Error saving new Category Subscription")
+	}
+	
 }
 
 pub type Schema = RootNode<'static, QueryRoot, MutationRoot>;

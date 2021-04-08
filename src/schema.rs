@@ -75,7 +75,7 @@ table! {
 }
 
 table! {
-    news (id) {
+    posts (id) {
         id -> Int4,
         company_id -> Int4,
         date -> Timestamptz,

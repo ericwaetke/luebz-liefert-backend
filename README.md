@@ -45,7 +45,7 @@ Todo:
 - [x] Change Company Subscription Status
 - [x] Change Category Subscription Status
 
-- Add Company
+- [x] Add Company
 - Update Company Information
 - Approve a Company
 
