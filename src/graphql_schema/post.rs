@@ -1,12 +1,12 @@
 use diesel::prelude::*;
 
-use crate::schema::news;
+use crate::schema::posts;
 
 use super::company::Company;
 use super::establish_connection;
 
 #[derive(Queryable, Clone)]
-pub struct News {
+pub struct Post {
 	id: i32,
 	company_id: i32,
 	date: chrono::NaiveDateTime,
@@ -14,8 +14,8 @@ pub struct News {
 	content: String,
 }
 
-#[juniper::object(description = "A News")]
-impl News{
+#[juniper::object(description = "A Post")]
+impl Post{
 	pub fn id(&self) -> i32 {
 		self.id
 	}
@@ -44,8 +44,8 @@ impl News{
 }
 
 #[derive(juniper::GraphQLInputObject, Insertable)]
-#[table_name = "news"]
-pub struct NewsPost {
+#[table_name = "posts"]
+pub struct NewPost {
 	company_id: i32,
 	title: String,
 	content: String,

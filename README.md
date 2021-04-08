@@ -60,11 +60,14 @@ Todo:
 - Generate & add token as verification metric
 - Delete Token
 - Check Token Validity
+- Reset Password
 
 
 - Send out notifications when new post is published
 	- Send that to category & company subscibers
 		- Send both with E-Mail or via Push Notification
+
+	- Opt out of emails
 
 - (QOL) Send regular email with weeks worth of news
 
