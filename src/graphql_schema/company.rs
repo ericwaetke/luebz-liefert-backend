@@ -8,7 +8,7 @@ use super::establish_connection;
 use super::user::User;
 use super::post::Post;
 
-#[derive(Queryable, Clone)]
+#[derive(Queryable, Clone, Debug)]
 pub struct Company {
 	pub id: i32,
 	pub name: String,

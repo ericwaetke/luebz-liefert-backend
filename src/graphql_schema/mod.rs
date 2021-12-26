@@ -8,7 +8,7 @@ use std::env;
 
 use juniper::{RootNode};
 
-
+use crate::schema;
 
 mod company;
 mod user;
@@ -28,6 +28,15 @@ pub fn establish_connection() -> PgConnection {
 	PgConnection::establish(&database_url).expect(&format!("Error connecting to {}", database_url))
 }
 pub struct QueryRoot;
+#[derive(Queryable)]
+
+pub struct DebugStruct {
+	bool: bool
+}
+#[juniper::object(description = "Queries a single subscribed company")]
+impl DebugStruct {
+	pub fn bool(&self) -> bool { self.bool }
+}
 
 #[juniper::object]
 impl QueryRoot {
@@ -58,13 +67,31 @@ impl QueryRoot {
 			.expect("Error could not load users")
 	}
 
-	fn all_users() -> Vec<User> {
-		use crate::schema::users::dsl::*;
+	// fn all_users() -> Vec<User> {
+	// 	use crate::schema::users::dsl::*;
+	// 	let connection = establish_connection();
+	// 	users
+	// 		.limit(100)
+	// 		.load::<User>(&connection)
+	// 		.expect("Error could not load users")
+	// }
+	
+	fn all_users() -> DebugStruct {
+		use schema::users::dsl::*;
+		use schema::companies;
 		let connection = establish_connection();
-		users
+		let res = users
+			.inner_join(companies::table)
 			.limit(100)
-			.load::<User>(&connection)
-			.expect("Error could not load users")
+			.load::<(User, Company)>(&connection)
+			.expect("Error could not load users");
+
+		dbg!(res);
+
+		DebugStruct{
+			bool: true
+		}
+
 	}
 
 	fn category(category_id: i32) -> Category {

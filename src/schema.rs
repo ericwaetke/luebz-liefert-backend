@@ -60,8 +60,8 @@ table! {
 }
 
 table! {
-    users (id) {
-        id -> Integer,
+    users (uuid) {
+        uuid -> Integer,
         email -> Nullable<Varchar>,
         password -> Nullable<Varchar>,
         name -> Nullable<Varchar>,

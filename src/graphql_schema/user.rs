@@ -6,7 +6,7 @@ use super::establish_connection;
 use super::company::Company;
 use super::category::Category;
 
-#[derive(Queryable, Clone)]
+#[derive(Queryable, Clone, Debug)]
 // #[belongs_to(Company)]
 pub struct User {
 	pub id: i32,
@@ -124,7 +124,7 @@ impl User {
 #[derive(juniper::GraphQLInputObject, Insertable)]
 #[table_name = "users"]
 pub struct NewUser {
-	pub id: i32,
+	pub uuid: uuid::Uuid,
 	pub email: Option<String>,
 	pub password: Option<String>,
 	pub name: Option<String>,
