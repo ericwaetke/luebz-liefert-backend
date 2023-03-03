@@ -22,7 +22,7 @@ Todo:
 - [x] One User
 
 - [x] Users:
-	- [x] Subscribed Comanies
+	- [x] Subscribed Companies
 	- [x] Subscribed Categories
 	
 - [x] All Categories
